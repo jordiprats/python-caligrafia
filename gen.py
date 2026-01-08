@@ -45,82 +45,81 @@ CATALAN_SENTENCES = [
 ]
 
 
-def draw_guidelines(c, y_position, line_height, width, page_width, page_height):
-    """Draw calligraphy practice guidelines"""
+def draw_practice_line(c, y_position, page_width):
+    """Draw a single practice line for writing"""
     margin = 20 * mm
     
-    # Base line (solid)
-    c.setStrokeColorRGB(0.3, 0.3, 0.3)
-    c.setLineWidth(0.5)
+    # Main writing line (solid black)
+    c.setStrokeColorRGB(0, 0, 0)
+    c.setLineWidth(0.8)
     c.line(margin, y_position, page_width - margin, y_position)
     
-    # Top line (solid)
-    c.line(margin, y_position + line_height, page_width - margin, y_position + line_height)
-    
-    # Middle dotted line (x-height)
-    c.setDash(2, 3)
-    c.setStrokeColorRGB(0.6, 0.6, 0.6)
-    c.line(margin, y_position + line_height * 0.5, page_width - margin, y_position + line_height * 0.5)
-    
-    # Ascender line (dotted)
-    c.line(margin, y_position + line_height * 0.75, page_width - margin, y_position + line_height * 0.75)
-    
-    # Descender line (dotted)
-    c.line(margin, y_position - line_height * 0.25, page_width - margin, y_position - line_height * 0.25)
-    
-    c.setDash()  # Reset to solid line
+    # Small starting mark to show where to begin
+    c.setStrokeColorRGB(0.5, 0.5, 0.5)
+    c.setLineWidth(1.5)
+    c.line(margin, y_position - 2*mm, margin, y_position + 2*mm)
 
 
-def draw_sentence(c, sentence, y_position, line_height, page_width):
-    """Draw a sentence above the guidelines in light gray"""
+def draw_sentence_header(c, sentence, y_position, page_width):
+    """Draw a sentence as an example to copy"""
     margin = 20 * mm
     
-    c.setFillColorRGB(0.8, 0.8, 0.8)
-    c.setFont("Helvetica", 10)
-    c.drawString(margin, y_position + line_height + 3, sentence)
+    # Draw "Model:" label
+    c.setFillColorRGB(0.3, 0.3, 0.3)
+    c.setFont("Helvetica-Bold", 9)
+    c.drawString(margin, y_position, "Model:")
+    
+    # Draw the sentence in a clear, readable font
+    c.setFillColorRGB(0, 0, 0)
+    c.setFont("Helvetica", 11)
+    c.drawString(margin + 15*mm, y_position, sentence)
 
 
-def generate_calligraphy_pdf(filename, num_pages=5, line_height=15, spacing=25):
+def generate_calligraphy_pdf(filename, num_pages=5, lines_per_sentence=3, line_spacing=12):
     """
     Generate a PDF with calligraphy practice lines
     
     Args:
         filename: Output PDF filename
         num_pages: Number of pages to generate
-        line_height: Height of each practice line in mm
-        spacing: Spacing between practice line sets in mm
+        lines_per_sentence: Number of practice lines per sentence
+        line_spacing: Spacing between practice lines in mm
     """
     page_width, page_height = A4
     c = canvas.Canvas(filename, pagesize=A4)
     
-    line_height_mm = line_height * mm
-    spacing_mm = spacing * mm
+    line_spacing_mm = line_spacing * mm
+    sentence_spacing = 20 * mm  # Space between different sentence blocks
     top_margin = 20 * mm
     bottom_margin = 20 * mm
     
     for page in range(num_pages):
-        y_position = page_height - top_margin - line_height_mm
+        y_position = page_height - top_margin
         
         # Add title on first page
         if page == 0:
             c.setFont("Helvetica-Bold", 16)
             c.setFillColorRGB(0, 0, 0)
-            c.drawCentredString(page_width / 2, page_height - 15 * mm, "Pràctica de Cal·ligrafia")
-            y_position -= 10 * mm
+            c.drawCentredString(page_width / 2, y_position, "Pràctica de Cal·ligrafia")
+            y_position -= 15 * mm
         
-        # Draw practice lines with sentences
-        while y_position > bottom_margin + line_height_mm:
+        # Draw sentences with practice lines
+        while y_position > bottom_margin + (lines_per_sentence * line_spacing_mm) + sentence_spacing:
             # Get a random sentence
             sentence = random.choice(CATALAN_SENTENCES)
             
-            # Draw the sentence above the guidelines
-            draw_sentence(c, sentence, y_position, line_height_mm, page_width)
+            # Draw the model sentence
+            y_position -= 8 * mm
+            draw_sentence_header(c, sentence, y_position, page_width)
             
-            # Draw the guidelines
-            draw_guidelines(c, y_position, line_height_mm, page_width, page_width, page_height)
+            # Draw multiple practice lines for this sentence
+            y_position -= 10 * mm
+            for i in range(lines_per_sentence):
+                draw_practice_line(c, y_position, page_width)
+                y_position -= line_spacing_mm
             
-            # Move down for next line set
-            y_position -= (line_height_mm + spacing_mm)
+            # Add space before next sentence
+            y_position -= (sentence_spacing - line_spacing_mm)
         
         # Add page number at bottom
         c.setFont("Helvetica", 9)
@@ -133,8 +132,8 @@ def generate_calligraphy_pdf(filename, num_pages=5, line_height=15, spacing=25):
     c.save()
     print(f"PDF generat: {filename}")
     print(f"  - Pàgines: {num_pages}")
-    print(f"  - Alçada de línia: {line_height} mm")
-    print(f"  - Espaiat: {spacing} mm")
+    print(f"  - Línies per frase: {lines_per_sentence}")
+    print(f"  - Espaiat entre línies: {line_spacing} mm")
 
 
 def main():
@@ -153,16 +152,16 @@ def main():
         help="Nombre de pàgines (per defecte: 5)"
     )
     parser.add_argument(
-        "-l", "--line-height",
+        "-l", "--lines",
         type=int,
-        default=15,
-        help="Alçada de cada línia en mm (per defecte: 15)"
+        default=3,
+        help="Nombre de línies per practicar cada frase (per defecte: 3)"
     )
     parser.add_argument(
         "-s", "--spacing",
         type=int,
-        default=25,
-        help="Espaiat entre línies en mm (per defecte: 25)"
+        default=12,
+        help="Espaiat entre línies de pràctica en mm (per defecte: 12)"
     )
     
     args = parser.parse_args()
@@ -170,8 +169,8 @@ def main():
     generate_calligraphy_pdf(
         filename=args.output,
         num_pages=args.pages,
-        line_height=args.line_height,
-        spacing=args.spacing
+        lines_per_sentence=args.lines,
+        line_spacing=args.spacing
     )
 
 
