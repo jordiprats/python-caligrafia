@@ -10,7 +10,6 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.units import mm
 import argparse
 
-# Collection of Catalan sentences for calligraphy practice
 CATALAN_SENTENCES = [
     "La pau comença amb un somriure.",
     "El temps és or, però l'amistat és un tresor.",
@@ -42,6 +41,26 @@ CATALAN_SENTENCES = [
     "Els castellers demostren força i equilibri.",
     "La Rambla és plena de vida.",
     "El Modernisme marca la ciutat.",
+    "Catalunya és una nació amb història pròpia.",
+    "El dret a decidir és fonamental.",
+    "Volem ser lliures i sobirans.",
+    "La democràcia és el camí a seguir.",
+    "Independència per construir el nostre futur.",
+    "Som una nació sense estat propi.",
+    "El poble català té dret a l'autodeterminació.",
+    "Lluitarem pacíficament pels nostres drets.",
+    "La nostra llengua és senyal d'identitat.",
+    "Respectem totes les opinions i somnis.",
+    "Construcció nacional des de la base popular.",
+    "El diàleg és l'eina de la pau.",
+    "Defensem els drets civils i polítics.",
+    "La memòria històrica ens dona força.",
+    "Junts som més forts i units.",
+    "Persistència i determinació pel nostre futur.",
+    "La llibertat no es pot negociar.",
+    "Cada vot compta per la nostra causa.",
+    "República catalana, somni de molts.",
+    "Treballem per un país millor per a tothom.",
 ]
 
 
