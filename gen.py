@@ -112,6 +112,11 @@ def generate_calligraphy_pdf(filename, num_pages=5, lines_per_sentence=3, line_s
     top_margin = 20 * mm
     bottom_margin = 20 * mm
     
+    # Create a shuffled copy of sentences to use without repetition
+    available_sentences = CATALAN_SENTENCES.copy()
+    random.shuffle(available_sentences)
+    sentence_index = 0
+    
     for page in range(num_pages):
         y_position = page_height - top_margin
         
@@ -124,8 +129,13 @@ def generate_calligraphy_pdf(filename, num_pages=5, lines_per_sentence=3, line_s
         
         # Draw sentences with practice lines
         while y_position > bottom_margin + (lines_per_sentence * line_spacing_mm) + sentence_spacing:
-            # Get a random sentence
-            sentence = random.choice(CATALAN_SENTENCES)
+            # Get next sentence from shuffled list
+            sentence = available_sentences[sentence_index % len(available_sentences)]
+            sentence_index += 1
+            
+            # If we've used all sentences, reshuffle and start over
+            if sentence_index % len(available_sentences) == 0:
+                random.shuffle(available_sentences)
             
             # Draw the model sentence
             y_position -= 8 * mm
@@ -153,6 +163,7 @@ def generate_calligraphy_pdf(filename, num_pages=5, lines_per_sentence=3, line_s
     print(f"  - Pàgines: {num_pages}")
     print(f"  - Línies per frase: {lines_per_sentence}")
     print(f"  - Espaiat entre línies: {line_spacing} mm")
+    print(f"  - Total frases úniques: {min(sentence_index, len(CATALAN_SENTENCES))}")
 
 
 def main():
