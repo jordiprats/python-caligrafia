@@ -8,8 +8,13 @@ import random
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import mm
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 import argparse
+import os
+import base64
 
+# Collection of Catalan sentences for calligraphy practice
 CATALAN_SENTENCES = [
     "La pau comença amb un somriure.",
     "El temps és or, però l'amistat és un tresor.",
@@ -64,6 +69,69 @@ CATALAN_SENTENCES = [
 ]
 
 
+# Base64 encoded Dancing Script font (cursive/script style)
+# This is a lightweight cursive font perfect for calligraphy practice
+DANCING_SCRIPT_FONT_B64 = None  # Will use fallback
+
+def setup_cursive_font():
+    """Try to setup a cursive/script font for calligraphy"""
+    # Priority: Educational fonts for children (Playwrite), then simple cursive fonts
+    # Playwrite fonts are specifically designed for teaching handwriting to children
+    cursive_fonts = [
+        # Playwrite fonts - Educational (best for children)
+        # Check both variable and static versions
+        '/Library/Fonts/PlaywriteES-VariableFont_wght.ttf',
+        os.path.expanduser('~/Library/Fonts/PlaywriteES-VariableFont_wght.ttf'),
+        '/Library/Fonts/PlaywriteES-Regular.ttf',
+        os.path.expanduser('~/Library/Fonts/PlaywriteES-Regular.ttf'),
+        # Static versions in subdirectories
+        '/Library/Fonts/static/PlaywriteES-Regular.ttf',
+        os.path.expanduser('~/Library/Fonts/static/PlaywriteES-Regular.ttf'),
+        # Other Playwrite variants
+        '/Library/Fonts/PlaywriteUSModern-VariableFont_wght.ttf',
+        os.path.expanduser('~/Library/Fonts/PlaywriteUSModern-VariableFont_wght.ttf'),
+        '/Library/Fonts/PlaywriteUSTrad-VariableFont_wght.ttf',
+        os.path.expanduser('~/Library/Fonts/PlaywriteUSTrad-VariableFont_wght.ttf'),
+        # Simple cursive fonts from Google Fonts (good for children)
+        '/Library/Fonts/GreatVibes-Regular.ttf',
+        os.path.expanduser('~/Library/Fonts/GreatVibes-Regular.ttf'),
+        '/Library/Fonts/Allura-Regular.ttf',
+        os.path.expanduser('~/Library/Fonts/Allura-Regular.ttf'),
+        '/Library/Fonts/Pacifico-Regular.ttf',
+        os.path.expanduser('~/Library/Fonts/Pacifico-Regular.ttf'),
+        '/Library/Fonts/DancingScript-Regular.ttf',
+        os.path.expanduser('~/Library/Fonts/DancingScript-Regular.ttf'),
+        '/Library/Fonts/DancingScript-VariableFont_wght.ttf',
+        os.path.expanduser('~/Library/Fonts/DancingScript-VariableFont_wght.ttf'),
+        '/Library/Fonts/LeagueScript-Regular.ttf',
+        os.path.expanduser('~/Library/Fonts/LeagueScript-Regular.ttf'),
+        # System fonts (fallback)
+        '/usr/share/fonts/truetype/ubuntu/Ubuntu-Italic.ttf',
+        '/usr/share/fonts/truetype/dejavu/DejaVuSerif-Italic.ttf',
+    ]
+    
+    for font_path in cursive_fonts:
+        if os.path.exists(font_path):
+            try:
+                font_name = os.path.basename(font_path).replace('.ttf', '')
+                pdfmetrics.registerFont(TTFont('CursiveFont', font_path))
+                print(f"✓ Font cursiva carregada: {font_name}")
+                return 'CursiveFont'
+            except Exception as e:
+                # Debug: show which font failed
+                # print(f"  No es pot carregar {font_name}: {e}")
+                continue
+    
+    # Fallback: Use Helvetica-Oblique which is always available in reportlab
+    print("⚠ No s'ha trobat cap font cursiva instal·lada.")
+    print("  Utilitzant Helvetica-Oblique com a font per defecte.")
+    print("\n  Per millorar la qualitat, instal·la una d'aquestes fonts:")
+    print("  - Playwrite ES: https://fonts.google.com/specimen/Playwrite+ES")
+    print("  - Great Vibes: https://fonts.google.com/specimen/Great+Vibes")
+    print("  - Allura: https://fonts.google.com/specimen/Allura")
+    return 'Helvetica-Oblique'
+
+
 def draw_practice_line(c, y_position, page_width):
     """Draw a single practice line for writing"""
     margin = 20 * mm
@@ -79,7 +147,20 @@ def draw_practice_line(c, y_position, page_width):
     c.line(margin, y_position - 2*mm, margin, y_position + 2*mm)
 
 
-def draw_sentence_header(c, sentence, y_position, page_width):
+def draw_dotted_guide(c, sentence, y_position, page_width, cursive_font='ZapfChancery-MediumItalic'):
+    """Draw a dotted/light gray version of the sentence as a tracing guide"""
+    margin = 20 * mm
+    
+    # Draw the sentence in very light gray for tracing
+    c.setFillColorRGB(0.7, 0.7, 0.7)  # Light gray for tracing
+    
+    c.setFont(cursive_font, 13)
+    
+    # Draw the sentence above the line - increased offset for better positioning
+    c.drawString(margin, y_position + 3*mm, sentence)
+
+
+def draw_sentence_header(c, sentence, y_position, page_width, cursive_font='ZapfChancery-MediumItalic'):
     """Draw a sentence as an example to copy"""
     margin = 20 * mm
     
@@ -88,13 +169,13 @@ def draw_sentence_header(c, sentence, y_position, page_width):
     c.setFont("Helvetica-Bold", 9)
     c.drawString(margin, y_position, "Model:")
     
-    # Draw the sentence in a clear, readable font
+    # Draw the sentence in cursive/script font (lletra lligada)
     c.setFillColorRGB(0, 0, 0)
-    c.setFont("Helvetica", 11)
+    c.setFont(cursive_font, 13)
     c.drawString(margin + 15*mm, y_position, sentence)
 
 
-def generate_calligraphy_pdf(filename, num_pages=5, lines_per_sentence=3, line_spacing=12):
+def generate_calligraphy_pdf(filename, num_pages=5, lines_per_sentence=3, line_spacing=12, use_cursive_font=True):
     """
     Generate a PDF with calligraphy practice lines
     
@@ -103,7 +184,13 @@ def generate_calligraphy_pdf(filename, num_pages=5, lines_per_sentence=3, line_s
         num_pages: Number of pages to generate
         lines_per_sentence: Number of practice lines per sentence
         line_spacing: Spacing between practice lines in mm
+        use_cursive_font: Whether to use cursive font (lletra lligada)
     """
+    # Setup cursive font
+    cursive_font = 'ZapfChancery-MediumItalic'  # Default fallback
+    if use_cursive_font:
+        cursive_font = setup_cursive_font()
+    
     page_width, page_height = A4
     c = canvas.Canvas(filename, pagesize=A4)
     
@@ -139,12 +226,17 @@ def generate_calligraphy_pdf(filename, num_pages=5, lines_per_sentence=3, line_s
             
             # Draw the model sentence
             y_position -= 8 * mm
-            draw_sentence_header(c, sentence, y_position, page_width)
+            draw_sentence_header(c, sentence, y_position, page_width, cursive_font)
             
             # Draw multiple practice lines for this sentence
             y_position -= 10 * mm
             for i in range(lines_per_sentence):
                 draw_practice_line(c, y_position, page_width)
+                
+                # On the first line, add dotted guide text to trace
+                if i == 0:
+                    draw_dotted_guide(c, sentence, y_position, page_width, cursive_font)
+                
                 y_position -= line_spacing_mm
             
             # Add space before next sentence
@@ -164,6 +256,7 @@ def generate_calligraphy_pdf(filename, num_pages=5, lines_per_sentence=3, line_s
     print(f"  - Línies per frase: {lines_per_sentence}")
     print(f"  - Espaiat entre línies: {line_spacing} mm")
     print(f"  - Total frases úniques: {min(sentence_index, len(CATALAN_SENTENCES))}")
+    print(f"  - Font lletra lligada: {cursive_font if use_cursive_font else 'No'}")
 
 
 def main():
@@ -193,14 +286,66 @@ def main():
         default=12,
         help="Espaiat entre línies de pràctica en mm (per defecte: 12)"
     )
+    parser.add_argument(
+        "--no-cursive",
+        action="store_true",
+        help="No utilitzar font de lletra lligada"
+    )
+    parser.add_argument(
+        "--find-fonts",
+        action="store_true",
+        help="Mostra on buscar les fonts instal·lades i surt"
+    )
     
     args = parser.parse_args()
+    
+    # Debug mode: find installed fonts
+    if args.find_fonts:
+        print("🔍 Cercant fonts instal·lades...\n")
+        font_dirs = [
+            '/Library/Fonts',
+            os.path.expanduser('~/Library/Fonts'),
+        ]
+        
+        for font_dir in font_dirs:
+            print(f"📁 Buscant a: {font_dir}")
+            if os.path.exists(font_dir):
+                try:
+                    files = os.listdir(font_dir)
+                    playwrite = [f for f in files if 'Playwrite' in f or 'playwrite' in f]
+                    cursive = [f for f in files if any(x in f for x in ['Great', 'Allura', 'Dancing', 'Pacifico'])]
+                    
+                    if playwrite:
+                        print("  ✓ Fonts Playwrite trobades:")
+                        for f in playwrite:
+                            print(f"    - {f}")
+                    
+                    if cursive:
+                        print("  ✓ Fonts cursives trobades:")
+                        for f in cursive:
+                            print(f"    - {f}")
+                    
+                    if not playwrite and not cursive:
+                        print("  ✗ No s'han trobat fonts cursives")
+                except Exception as e:
+                    print(f"  ✗ Error llegint directori: {e}")
+            else:
+                print(f"  ✗ Directori no existeix")
+            print()
+        
+        print("💡 Si has instal·lat Playwrite ES però no apareix:")
+        print("   1. Obre Font Book")
+        print("   2. Selecciona la font Playwrite ES")
+        print("   3. Mira a File > Show Font Info per veure la ubicació")
+        print("   4. Si està en un subdirectori, mou-la a ~/Library/Fonts/")
+        return
     
     generate_calligraphy_pdf(
         filename=args.output,
         num_pages=args.pages,
         lines_per_sentence=args.lines,
-        line_spacing=args.spacing
+        line_spacing=args.spacing,
+        use_cursive_font=not args.no_cursive
     )
 
 
