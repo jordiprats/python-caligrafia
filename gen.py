@@ -147,7 +147,7 @@ def draw_practice_line(c, y_position, page_width):
     c.line(margin, y_position - 2*mm, margin, y_position + 2*mm)
 
 
-def draw_dotted_guide(c, sentence, y_position, page_width, cursive_font='ZapfChancery-MediumItalic'):
+def draw_dotted_guide(c, sentence, y_position, page_width, cursive_font='Helvetica-Oblique'):
     """Draw a dotted/light gray version of the sentence as a tracing guide"""
     margin = 20 * mm
     
@@ -156,8 +156,9 @@ def draw_dotted_guide(c, sentence, y_position, page_width, cursive_font='ZapfCha
     
     c.setFont(cursive_font, 13)
     
-    # Draw the sentence above the line - increased offset for better positioning
-    c.drawString(margin, y_position + 3*mm, sentence)
+    # Draw the sentence with baseline sitting exactly ON the line (y_position)
+    # The y_position IS the baseline, so we draw at y_position directly
+    c.drawString(margin, y_position, sentence)
 
 
 def draw_sentence_header(c, sentence, y_position, page_width, cursive_font='ZapfChancery-MediumItalic'):
