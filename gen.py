@@ -14,7 +14,6 @@ import argparse
 import os
 import base64
 
-# Collection of Catalan sentences for calligraphy practice
 CATALAN_SENTENCES = [
     "La pau comença amb un somriure.",
     "El temps és or, però l'amistat és un tresor.",
@@ -55,6 +54,55 @@ CATALAN_SENTENCES = [
     "Junts som més forts i units.",
     "República catalana, somni de molts.",
     "Treballem per un país millor per a tothom.",
+    # More inspirational and wisdom phrases
+    "La generositat enriqueix l'ànima.",
+    "Cada somriure il·lumina el món.",
+    "La perseverança supera qualsevol obstacle.",
+    "El respecte és la base de la convivència.",
+    "Un llibre és una finestra al món.",
+    "La creativitat no té límits.",
+    "L'amistat és el tresor més preuat.",
+    "El coratge es troba dins nostre.",
+    "La curiositat obre noves portes.",
+    "Viure és aprendre constantment.",
+    "L'esperança mai no mor.",
+    "Cada moment és un regal únic.",
+    "La vida és una aventura meravellosa.",
+    "Els records són el nostre tresor.",
+    "Somiar és el primer pas per crear.",
+    "La bondat sempre torna a nosaltres.",
+    "El present és el moment més important.",
+    "La vida creix on hi ha amor.",
+    # More Catalan culture and places
+    "Girona guarda segles d'història.",
+    "Tarragona té restes romanes fascinants.",
+    "El Pirineu català és majestuós.",
+    "Lleida és la porta als Pirineus.",
+    "La Costa Brava és un paradís mediterrani.",
+    "El Delta de l'Ebre és terra d'arròs.",
+    "Vic té un mercat medieval impressionant.",
+    "Cadaqués va inspirar Salvador Dalí.",
+    "Sitges celebra el Carnaval amb passió.",
+    "La Sagrada Família és una obra mestra.",
+    "El Park Güell és pura imaginació.",
+    "Les Rambles són el cor de Barcelona.",
+    "La Pedrera és arquitectura viva.",
+    "El Barri Gòtic respira història.",
+    "Montjuïc ofereix vistes meravelloses.",
+    # More values and inspirational
+    "L'educació transforma el món.",
+    "La solidaritat ens fa millors.",
+    "La cultura ens uneix i enriqueix.",
+    "La tolerància construeix ponts.",
+    "El futur es construeix avui.",
+    "La diversitat és la nostra riquesa.",
+    "L'esforç honest sempre dona fruits.",
+    "La llibertat d'expressió és essencial.",
+    "El progrés neix de la cooperació.",
+    "La igualtat és un dret de tots.",
+    "L'honestedat és la millor política.",
+    "La família és el nostre refugi.",
+    "Els valors es transmeten amb l'exemple.",
 ]
 
 
